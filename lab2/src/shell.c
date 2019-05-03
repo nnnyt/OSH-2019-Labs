@@ -31,18 +31,24 @@ void do_pipe(char *args[128],int cmd_pos[128],int i,int pipe_num,int arg_num){
             }
         }
         execvp(args[cmd_pos[i]], args+cmd_pos[i]);
-        exit(1);
+        exit(255);
     }
     
     int fd[2];
-    pipe(fd);
-    if (fork() == 0){
+    if(pipe(fd) < 0){
+	perror("Failed to create pipe!");
+	exit(255);
+    }
+    pid_t pid = fork();
+    if (pid == 0){
         close(fd[0]);
         dup2(fd[1],1);
         close(fd[1]);
         execvp(args[cmd_pos[i]],args+cmd_pos[i]);
         exit(255);
     }
+    else if(pid < 0)
+	perror("Failed to fork!");
     close(fd[1]);
     dup2(fd[0], 0);
     close(fd[0]);
@@ -142,8 +148,13 @@ int main() {
         if (pid == 0) {
             /* 子进程 */
             do_pipe(args,cmd_pos,0,pipe_num,arg_num);
-            exit(0);
+            perror("Failed to execute!");
+	    return 255;
         }
+	else if(pid < 0){
+	    perror("Failed to fork aa!");
+	    continue;
+	}
             
         /* 父进程 */
         int status;

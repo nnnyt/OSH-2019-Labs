@@ -146,6 +146,7 @@ void* threadpool_function(void* arg)
             pool->head = pjob->next;
         if (pool->queue_cur_num == 0)
             pthread_cond_signal(&(pool->queue_empty));        //队列为空，就可以通知threadpool_destroy函数，销毁线程函数
+        pthread_mutex_unlock(&(pool->mutex));
         handle_clnt(pjob->clnt_sock);   //线程真正要做的工作，回调函数的调用
         free(pjob);
         pjob = NULL;

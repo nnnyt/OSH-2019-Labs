@@ -167,17 +167,17 @@ gcc server.c -o server -pthread
 得到的性能指标为
 
 ```
-Transactions:							2550 hits
-Availability:							100.00%
-Elapsed time:							17.70 secs
-Data transferred:					12001.26 MB
-Response time:						1.57 secs
-Transaction rate:					122.07 trans/sec
-Throughput:								678.04 MB/sec
-Concurrency:							226.12
-Successful transactions:	2550
-Failed transactions:			0
-Longest transaction:			9.56
-Shortest transaction:			0.01
+Transactions:2550 hits
+Availability:100.00%
+Elapsed time:17.70 secs
+Data transferred:12001.26 MB
+Response time:1.57 secs
+Transaction rate:122.07 trans/sec
+Throughput:678.04 MB/sec
+Concurrency:226.12
+Successful transactions:2550
+Failed transactions:0
+Longest transaction:9.56
+Shortest transaction:0.01
 ```
-
+![测试截图](https://github.com/nnnyt/OSH-2019-Labs/blob/master/lab3/docs/测试截图.png)

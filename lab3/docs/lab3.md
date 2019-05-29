@@ -40,13 +40,26 @@ struct threadpool
 
 #### 解析和检验HTTP头
 
-* 使用`recv`函数读取请求：
+* 读取请求：
 
-  `recv(clnt_sock,req,MAX_RECV_LEN,0)`表示从`clnt_sock`中读取最多为`MAX_RECV_LEN`大小的数据复制到`req`中，为非阻塞模式。
+  由于`read`可能一次不能读完请求，所以需要循环读取。
 
-  当返回值为`EAGAIN`时表示缓冲区已无数据可读，返回值为0表示对端的`socket`已正常关闭。正常读取结束后，返回值为复制到`req`中数据的大小。
+  ```c
+  		req[0] = '\0';
+      char* buf = (char*) malloc(MAX_RECV_LEN * sizeof(char));
+      ssize_t read_len;
+      while(1)
+      {
+          read_len = read(clnt_sock, buf, MAX_RECV_LEN - 1);
+        	if (read_len < 0) handle_error("failed to read clnt_sock");
+          buf[read_len] = '\0';
+          strcat(req, buf);
+          if(buf[read_len - 4] == '\r' && buf[read_len - 3] == '\n' && buf[read_len - 2] == '\r' && buf[read_len - 1] == '\n') break;
+      }
+      *req_len = strlen(req);
+  ```
 
-  在此实验中，如果返回值小于等于0，则为错误情况，进行错误处理。由于我们设置的`MAX_RECV_LEN`为1048576，而`MAX_PATH_LEN`只有4096，因此如果读够了`MAX_RECV_LEN`长度的`req`，我们有理由认为已经`path`部分读取完成。此实验中只关心`path`，所以无需在读满`MAX_RECV_LEN`后再次进行读取余下的数据。
+  `buf`临时保存读到的内容，`read_len`为一次读取到的数据。如果`read`函数返回值为负数，则出错，进行错误处理，否则将新读到的内容接在已读到的内容后面。如果读到的内容最后几位为`"\r\n\r\n"`则已读完，跳出循环。
 
 * 最大路径长度：
 

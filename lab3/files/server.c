@@ -26,8 +26,19 @@
 
 int parse_request(int clnt_sock,char *req,ssize_t *req_len,struct stat *fstatus)
 {
-    *req_len = recv(clnt_sock,req,MAX_RECV_LEN,0);
-    if(*req_len <= 0) handle_error("failed to recv clnt_sock");
+    req[0] = '\0';
+    char* buf = (char*) malloc(MAX_RECV_LEN * sizeof(char));
+    ssize_t read_len;
+    while(1)
+    {
+        read_len = read(clnt_sock, buf, MAX_RECV_LEN - 1);
+        if (read_len < 0) handle_error("failed to read clnt_sock");
+        buf[read_len] = '\0';
+        strcat(req, buf);
+        if(buf[read_len - 4] == '\r' && buf[read_len - 3] == '\n' && buf[read_len - 2] == '\r' && buf[read_len - 1] == '\n') break;
+    }
+    *req_len = strlen(req);
+    if(*req_len <= 0) handle_error("failed to read clnt_sock");
     if(*req_len < 5) return -2;// 500 没有'GET /'
     if(req[0]!='G'||req[1]!='E'||req[2]!='T'||req[3]!=' '||req[4]!= '/') return -2;
     ssize_t s1 = 3;

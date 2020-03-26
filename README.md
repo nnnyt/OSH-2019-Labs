@@ -1,3 +1,2 @@
 # OSH-2019-Labs
-姓名：宁雨亭
-学号：PB17111577
+Labs for USTC OS(H) 2019 Spring
